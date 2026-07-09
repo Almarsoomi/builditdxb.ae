@@ -1,0 +1,464 @@
+/* ============================================================
+   BUILD IT CONTRACTING — Under Construction
+   Industrial Luxe: charcoal, concrete, copper.
+   ============================================================ */
+
+:root {
+  --charcoal-900: #171716;
+  --charcoal-800: #1F1E1C;
+  --charcoal-700: #2A2926;
+  --concrete:     #9C958A;
+  --paper:        #EDE7DC;
+  --copper:       #C17A47;
+  --copper-hi:    #E0A16E;
+  --copper-deep:  #9A5A30;
+
+  --font-display: "Bebas Neue", "Arial Narrow", sans-serif;
+  --font-body:    "Chivo", system-ui, sans-serif;
+  --font-mono:    "Space Mono", "Courier New", monospace;
+
+  --copper-metal: linear-gradient(180deg, var(--copper-hi) 0%, var(--copper) 55%, var(--copper-deep) 100%);
+
+  --track: .18em;
+  --ease-out: cubic-bezier(.22, .8, .3, 1);
+  --progress-target: 78%;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { height: 100%; }
+
+body {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  background: var(--charcoal-900);
+  color: var(--paper);
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Atmosphere layers ---------- */
+
+.bg-grid,
+.bg-grid-lit,
+.bg-glow,
+.bg-grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* blueprint / engineering grid */
+.bg-grid {
+  z-index: 0;
+  background-image:
+    linear-gradient(var(--charcoal-700) 1px, transparent 1px),
+    linear-gradient(90deg, var(--charcoal-700) 1px, transparent 1px);
+  background-size: 72px 72px;
+  opacity: .28; /* charcoal-700 on charcoal-900 ≈ 5% effective contrast */
+  will-change: transform;
+}
+
+/* copper inspection spotlight: a brighter copper-tinted copy of the grid,
+   masked to a circle that follows the cursor (--mx/--my set from JS).
+   Defaults park it off-screen so it's invisible until the pointer moves. */
+.bg-grid-lit {
+  z-index: 1;
+  background-image:
+    radial-gradient(circle 260px at var(--mx, -600px) var(--my, -600px),
+      rgba(193, 122, 71, 0.14), transparent 70%),
+    linear-gradient(rgba(224, 161, 110, 0.55) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(224, 161, 110, 0.55) 1px, transparent 1px);
+  background-size: 100% 100%, 72px 72px, 72px 72px;
+  -webkit-mask-image: radial-gradient(circle 260px at var(--mx, -600px) var(--my, -600px),
+      #000 0%, rgba(0, 0, 0, 0.35) 55%, transparent 78%);
+  mask-image: radial-gradient(circle 260px at var(--mx, -600px) var(--my, -600px),
+      #000 0%, rgba(0, 0, 0, 0.35) 55%, transparent 78%);
+  opacity: 0;
+  transition: opacity .5s var(--ease-out);
+  will-change: transform;
+}
+
+.bg-grid-lit.is-on { opacity: .5; }
+
+/* warm copper light bleeding from the top, behind the logo */
+.bg-glow {
+  z-index: 1;
+  background:
+    radial-gradient(ellipse 60% 42% at 50% 12%,
+      rgba(193, 122, 71, 0.16) 0%,
+      rgba(193, 122, 71, 0.05) 45%,
+      transparent 72%);
+}
+
+/* film grain — feTurbulence, blended over everything */
+.bg-grain {
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  opacity: .05;
+  mix-blend-mode: overlay;
+}
+
+header, main, footer { position: relative; z-index: 3; }
+
+/* ---------- Top bar ---------- */
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem clamp(1.25rem, 4vw, 3rem);
+  border-bottom: 1px solid var(--charcoal-700);
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  letter-spacing: var(--track);
+}
+
+.topbar-brand { color: var(--concrete); }
+
+.topbar-domain {
+  color: var(--paper);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color .25s var(--ease-out), border-color .25s var(--ease-out);
+}
+
+.topbar-domain:hover { color: var(--copper-hi); border-bottom-color: var(--copper); }
+
+/* ---------- Hero ---------- */
+
+.hero {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: clamp(2rem, 5vh, 4rem) 1.25rem 0;
+}
+
+.hero-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 46rem;
+}
+
+.logo {
+  width: min(58vw, 400px);
+  height: auto;
+  border-radius: 6px;
+  /* soft copper glow so the JPG sits on the dark base without a hard box */
+  filter: drop-shadow(0 0 34px rgba(193, 122, 71, 0.28))
+          drop-shadow(0 10px 42px rgba(0, 0, 0, 0.55));
+}
+
+.kicker {
+  margin-top: clamp(1.5rem, 3.5vh, 2.5rem);
+  font-family: var(--font-mono);
+  font-size: .78rem;
+  letter-spacing: var(--track);
+  color: var(--copper-hi);
+}
+
+.headline {
+  margin-top: .75rem;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(3.2rem, 10vw, 6.75rem);
+  line-height: .94;
+  letter-spacing: .015em;
+  text-transform: uppercase;
+}
+
+.headline .line { display: block; }
+
+.headline .copper {
+  font-style: normal;
+  background: var(--copper-metal);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* copper surveyor hairline drawing across under the H1 */
+.surveyor-line {
+  width: min(240px, 40vw);
+  height: 1px;
+  margin-top: 1.4rem;
+  background: var(--copper-metal);
+  transform-origin: left center;
+  animation: draw-line .9s var(--ease-out) 640ms both;
+}
+
+@keyframes draw-line {
+  from { transform: scaleX(0); opacity: 0; }
+  to   { transform: scaleX(1); opacity: 1; }
+}
+
+.subline {
+  margin-top: 1.4rem;
+  max-width: 34rem;
+  color: var(--concrete);
+  font-size: clamp(.95rem, 1.4vw, 1.05rem);
+}
+
+/* ---------- Progress bar ---------- */
+
+.progress {
+  width: min(420px, 82vw);
+  margin-top: clamp(1.8rem, 4vh, 2.6rem);
+}
+
+.progress-track {
+  height: 4px;
+  background: var(--charcoal-700);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  position: relative;
+  height: 100%;
+  width: var(--progress-target);
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--copper-deep), var(--copper) 60%, var(--copper-hi));
+  overflow: hidden;
+  animation: fill-bar 1.4s var(--ease-out) 900ms both;
+}
+
+/* light sweep across the copper fill, like polished metal catching light */
+.progress-fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 20%, rgba(237, 231, 220, .45) 50%, transparent 80%);
+  transform: translateX(-120%);
+  animation: bar-shimmer 3.2s ease-in-out 2.4s infinite;
+}
+
+@keyframes fill-bar {
+  from { width: 0; }
+  to   { width: var(--progress-target); }
+}
+
+@keyframes bar-shimmer {
+  0%       { transform: translateX(-120%); }
+  45%, 100% { transform: translateX(120%); }
+}
+
+.progress-label {
+  margin-top: .7rem;
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  letter-spacing: var(--track);
+  color: var(--concrete);
+  text-align: left;
+}
+
+/* the counted-up value breathes copper in sync with the shimmer */
+.progress-label .value {
+  color: var(--copper-hi);
+  animation: value-pulse 3.2s ease-in-out 2.4s infinite;
+}
+
+@keyframes value-pulse {
+  0%, 45%, 100% { text-shadow: none; }
+  20% { text-shadow: 0 0 12px rgba(224, 161, 110, .8); }
+}
+
+/* ---------- Contact chips ---------- */
+
+.cta-line {
+  margin-top: clamp(1.6rem, 3.5vh, 2.2rem);
+  color: var(--concrete);
+  font-size: .95rem;
+}
+
+.chips {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .75rem;
+  margin-top: 1rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  min-height: 44px;
+  padding: .55rem 1.1rem;
+  font-family: var(--font-mono);
+  font-size: .8rem;
+  color: var(--paper);
+  text-decoration: none;
+  background: var(--charcoal-800);
+  border: 1px solid var(--charcoal-700);
+  border-radius: 3px;
+  transition: border-color .25s var(--ease-out),
+              color .25s var(--ease-out),
+              transform .25s var(--ease-out),
+              box-shadow .25s var(--ease-out);
+}
+
+.chip-icon {
+  width: 17px;
+  height: 17px;
+  color: var(--copper);
+  flex-shrink: 0;
+  transition: transform .25s var(--ease-out), color .25s var(--ease-out);
+}
+
+a.chip:hover {
+  border-color: var(--copper);
+  color: var(--copper-hi);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+a.chip:hover .chip-icon {
+  color: var(--copper-hi);
+  transform: translateX(2px);
+}
+
+.chip-static { color: var(--concrete); }
+
+.status-line {
+  margin-top: clamp(1.6rem, 3.5vh, 2.4rem);
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  letter-spacing: var(--track);
+  color: var(--concrete);
+}
+
+/* ---------- Skyline ---------- */
+
+.skyline {
+  width: 100%;
+  max-width: 1200px;
+  margin-top: clamp(2rem, 5vh, 3.5rem);
+  color: var(--copper);
+  opacity: .55;
+}
+
+.skyline svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ---------- Footer ---------- */
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .75rem 1.5rem;
+  padding: 1.1rem clamp(1.25rem, 4vw, 3rem) 1.3rem;
+  border-top: 1px solid var(--charcoal-700);
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  letter-spacing: .06em;
+  color: var(--concrete);
+}
+
+.footer-right {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+}
+
+.footer a {
+  color: var(--concrete);
+  text-decoration: none;
+  transition: color .25s var(--ease-out);
+}
+
+.footer a:hover { color: var(--copper-hi); }
+
+.footer .social {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+}
+
+.footer .social svg { width: 17px; height: 17px; }
+
+/* ---------- Focus visibility ---------- */
+
+a:focus-visible {
+  outline: 2px solid var(--copper);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ---------- Load orchestration ---------- */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  animation: reveal .7s var(--ease-out) var(--d, 0ms) both;
+}
+
+.logo.reveal {
+  transform: translateY(10px) scale(.96);
+  animation-name: reveal-logo;
+  animation-duration: .9s;
+}
+
+@keyframes reveal {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes reveal-logo {
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ---------- Reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .surveyor-line,
+  .progress-fill {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .chip, .chip-icon { transition: none; }
+  .bg-grid { transform: none !important; }
+  .progress-fill::after { animation: none; opacity: 0; }
+  .progress-label .value { animation: none; }
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 768px) {
+  .topbar { font-size: .64rem; }
+  .skyline { opacity: .45; }
+  .footer { justify-content: center; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .topbar {
+    flex-direction: column;
+    gap: .35rem;
+    padding-top: .85rem;
+    padding-bottom: .85rem;
+  }
+  .chips { flex-direction: column; align-items: stretch; }
+  .chip { justify-content: center; }
+  .progress-label { text-align: center; }
+}
